@@ -1,1 +1,1 @@
-sample-merchant-server: taprootd
+web: bundle exec taprootd --port ${PORT}
