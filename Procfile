@@ -1,0 +1,1 @@
+sample-merchant-server: taprootd

@@ -1,0 +1,21 @@
+BraintreeAccounts:
+  sandbox:
+    environment: sandbox
+    merchant_id: dcpspy2brwdjr3qn # CHANGE THIS LINE TO YOUR BRAINTREE MERCHANT ID
+    public_key: 9wwrzqk3vr3t4nc8 # CHANGE THIS LINE TO YOUR BRAINTREE PUBLIC KEY
+    private_key: 24a9f6c486ebb6968ed00379c276c31c # CHANGE THIS LINE TO YOUR BRIANTREE PRIVATE KEY
+  qa_altpay:
+    environment: qa
+    merchant_id: altpay_merchant
+    public_key: altpay_merchant_public_key
+    private_key: altpay_merchant_private_key
+  altpay_merchant:
+    environment: development
+    merchant_id: altpay_merchant
+    public_key: altpay_merchant_public_key
+    private_key: altpay_merchant_private_key
+  integration_merchant:
+    environment: development
+    merchant_id: integration_merchant_id
+    public_key: integration_public_key
+    private_key: integration_private_key
