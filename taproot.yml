@@ -1,6 +1,0 @@
-BraintreeAccounts:
-  sandbox:
-    environment: sandbox
-    merchant_id: dcpspy2brwdjr3qn # CHANGE THIS LINE TO YOUR BRAINTREE MERCHANT ID
-    public_key: 9wwrzqk3vr3t4nc8 # CHANGE THIS LINE TO YOUR BRAINTREE PUBLIC KEY
-    private_key: 24a9f6c486ebb6968ed00379c276c31c # CHANGE THIS LINE TO YOUR BRIANTREE PRIVATE KEY
