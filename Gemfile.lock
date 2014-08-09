@@ -1,6 +1,6 @@
 GIT
   remote: https://c47585f65b897bbd8991a636b093a91965c2f257:x-oauth-basic@github.com/benmills/taproot.git
-  revision: 997a22993ad11048b2788e2fe1b0f6e947cb0512
+  revision: adda25fa9501a3d24f198a09d52e58cd8ddfa317
   branch: feature/client_token_v2
   specs:
     taproot (0.1.4)
@@ -84,7 +84,7 @@ GEM
     thread_safe (0.3.4)
     tilt (1.4.1)
     tins (1.3.0)
-    tzinfo (1.2.1)
+    tzinfo (1.2.2)
       thread_safe (~> 0.1)
 
 PLATFORMS
