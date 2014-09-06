@@ -1,6 +1,6 @@
 GIT
   remote: https://c47585f65b897bbd8991a636b093a91965c2f257:x-oauth-basic@github.com/benmills/taproot.git
-  revision: fda24a53dd2596abffac9c9464e98e80381efe74
+  revision: 4a34dd214c7632d2e54d3e427db05c02886ee7dc
   branch: feature/client_token_v2
   specs:
     taproot (0.1.4)
