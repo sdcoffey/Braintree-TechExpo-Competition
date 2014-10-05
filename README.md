@@ -36,6 +36,14 @@ It's easy to spin up a new instance of your own:
   * `heroku config:set GITHUB_OAUTH=YOUR_GITHUB_OAUTH_TOKEN # https://github.com/settings/applications#personal-access-tokens OR curl -u 'GITHUB_USERNAME' -d '{"scopes":["repo"],"note":"Braintree Sample Merchant"}' https://api.github.com/authorizations
 4. Deploy with `git push heroku`
 
+## API Examples
+
+* `GET /client_token` - retrieve a client token embedded in JSON under the key `client_token`
+* `GET /client_token?decode=1` - retrieve a client token decoded client token
+* `GET /client_token?version=1` - retrieve a `v1` client token
+* `GET /config/current` - see which Braintree environment is being used
+* `GET /` - retrieve an API listing
+
 ### Dependencies
 
 This app is referenced in braintree-{ios,android} and the docs. If you make changes, make sure they are compatible before deploying changes.
