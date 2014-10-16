@@ -1,6 +1,6 @@
 GIT
   remote: https://c47585f65b897bbd8991a636b093a91965c2f257:x-oauth-basic@github.com/benmills/taproot.git
-  revision: 20a649aed6a4399838350ef92508dcbf567f0205
+  revision: 3773f7513d7992da31757dfc4f73dd9a2976ce41
   branch: feature/client_token_v2
   specs:
     taproot (0.1.4)
@@ -23,7 +23,7 @@ GEM
       tzinfo (~> 1.1)
     addressable (2.3.6)
     awesome_print (1.2.0)
-    backports (3.6.1)
+    backports (3.6.3)
     braintree (2.32.1)
       builder (>= 2.0.0)
     builder (3.2.2)
