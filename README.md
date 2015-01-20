@@ -13,6 +13,8 @@ $EDITOR config.yml # Modify this file with your development/sandbox/production c
 
 Now you'll be able to obtain a client token with `curl localhost:3132/client_token`.
 
+To activate a different configuration, `curl -XPOST -d'' localhost:3132/config/:name/activate`.
+
 For a full listing of available endpoints, `curl localhost:3132`.
 
 ## Deployment
