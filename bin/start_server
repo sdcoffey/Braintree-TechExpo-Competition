@@ -1,0 +1,84 @@
+#!/usr/bin/env ruby
+
+require "optparse"
+require "pathname"
+require "pry"
+require "rack"
+require "yaml"
+
+DEFAULT_CONFIG_PATH = Pathname.new("config.yml")
+
+require_relative "../merchant_server/config_manager"
+require_relative "../merchant_server/server"
+
+options = {}
+option_parser = OptionParser.new do |opts|
+  opts.banner = "Usage: ./bin/start_server [options]"
+
+  opts.on("--merchant-id [id]", "Braintree Merchant ID") do |v|
+    options[:merchant_id] = v
+  end
+
+  opts.on("--merchant-account-id [id]", "Braintree Merchant Account ID") do |v|
+    options[:merchant_account_id] = v
+  end
+
+  opts.on("--environment [env]", "Braintree Environment") do |v|
+    options[:environment] = v.to_sym if v.respond_to? :to_sym
+  end
+
+  opts.on("--public-key [key]", "Braintree Public Key") do |v|
+    options[:public_key] = v
+  end
+
+  opts.on("--private-key [key]", "Braintree Private Key") do |v|
+    options[:private_key] = v
+  end
+
+  opts.on("-c [config file]", "--config [config file]", "YAML config (defaults to #{DEFAULT_CONFIG_PATH})") do |v|
+    options[:config_file] = v
+  end
+
+  opts.on("-p [port]", "--port [port]", "Port") do |v|
+    options[:port] = v
+  end
+end
+option_parser.parse!
+
+CONFIG_MANAGER = MerchantServer::ConfigManager.new
+config_file = options.fetch(:config_file, DEFAULT_CONFIG_PATH)
+
+if File.exists?(config_file)
+  config_file = File.read(config_file)
+  YAML.load(config_file).fetch("BraintreeAccounts", {}).each do |name, braintree_account_args|
+    CONFIG_MANAGER.add(name, braintree_account_args)
+  end
+end
+
+if ([:merchant_id, :environment, :public_key, :private_key] - options.keys).length == 0
+  CONFIG_MANAGER.add(
+    "commandline",
+    :environment => options[:environment],
+    :merchant_id => options[:merchant_id],
+    :public_key => options[:public_key],
+    :private_key => options[:private_key]
+  )
+end
+
+
+if (options[:merchant_account_id])
+  CONFIG_MANAGER.current_merchant_account = options[:merchant_account_id]
+end
+
+
+unless CONFIG_MANAGER.valid?
+  puts "Need at least one Braintree account."
+  option_parser.parse! ["--help"]
+  exit 1
+end
+
+CONFIG_MANAGER.activate_first!
+
+Rack::Handler::WEBrick.run(MerchantServer::Server, {:Port => options.fetch(:port, "3132")}) do |server|
+  [:INT, :TERM].each { |sig| trap(sig) { server.stop } }
+end
