@@ -79,6 +79,6 @@ end
 
 CONFIG_MANAGER.activate_first!
 
-Rack::Handler::WEBrick.run(MerchantServer::Server, {:Port => options.fetch(:port, "3132")}) do |server|
+Rack::Handler::WEBrick.run(MerchantServer::Server, {:Host => '0.0.0.0', :Port => options.fetch(:port, "3132")}) do |server|
   [:INT, :TERM].each { |sig| trap(sig) { server.stop } }
 end

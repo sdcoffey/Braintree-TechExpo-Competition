@@ -14,8 +14,11 @@ module MerchantServer
     register Sinatra::Decompile
     include Term::ANSIColor
 
-    set :public_folder, "."
-    set :views, "."
+    configure :development do
+      register Sinatra::Reloader
+    end
+
+    set :bind, '0.0.0.0'
     set :static, true
 
     get "/web" do
