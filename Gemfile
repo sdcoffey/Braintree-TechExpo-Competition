@@ -8,7 +8,7 @@ group :development do
 end
 
 gem "sinatra", "~> 1.4.5"
-gem "braintree", "~> 2.32.1"
+gem "braintree", :git => "git@github.braintreeps.com:braintree/braintree-ruby", :branch => "upgrade_nonces"
 gem "pry", "~> 0.9.12.6"
 gem "activesupport", "~> 4.1.1"
 gem "term-ansicolor", "~> 1.3.0"

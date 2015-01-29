@@ -1,0 +1,88 @@
+<script src="braintree-3ds-2.4.0-rc.2.min.js"></script>
+<script src="jquery-2.1.1.js"></script>
+<script>
+  // Using the generated client token to instantiate the 3D-Secure client.
+  function threeDS() {
+    var client = new braintree.api.Client({
+      clientToken: "<%= @client_token %>"
+    });
+    var number = document.getElementById("number").value
+    var expirationMonth = document.getElementById("expiration_month").value
+    var expirationYear = document.getElementById("expiration_year").value
+    var amount = document.getElementById("amount").value
+
+    client.verify3DS({
+      amount: amount,
+      creditCard: {
+        number: number,
+        expirationMonth: expirationMonth,
+        expirationYear: expirationYear
+      }
+    }, function (errors, response) {
+      if (!errors) {
+        // Use threeDSecureToken and nonce
+
+        document.getElementById("payment_method_nonce").value = response.nonce;
+        console.log(response.nonce);
+        console.log(response);
+        console.log(document.getElementById("checkout"));
+        document.getElementById("checkout").submit();
+      } else {
+        // Handle errors
+        console.log(errors);
+      }
+    });
+  }
+</script>
+
+<link rel="stylesheet" href="foundation.min.css">
+
+<div class="row">
+  <div class="small-12 columns">
+    <form id="checkout" method="POST" action="/nonce/transaction">
+      <div class="row">
+        <div class="small-12 columns">
+          <label for="amount">
+            How much are you willing to spend on this crap?
+            <input type="number" name="amount" id="amount" placeholder="100" />
+          </label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="small-12 columns">
+          <label for="number">Number</label>
+          <input type="text" name="number" id="number" value="4111111111111111">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="small-12 columns">
+          <label for="expiration_month">EXP Month</label>
+          <input type="text" name="expiration_month" id="expiration_month" value="10">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="small-12 columns">
+          <label for="expiration_year">EXP Year</label>
+          <input type="text" name="expiration_year" id="expiration_year" value="20">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="small-12 columns">
+          <input type="checkbox" name="three_d_secure_required" value="true" />
+          <label for="three_d_secure_required">Three D Secure Required</label>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="small-12 columns">
+          <input name="nonce" type="hidden" id="payment_method_nonce">
+        </div>
+      </div>
+
+      <button id="buy" onclick="threeDS(); return false;">Pay</button>
+    </form>
+  </div>
+</div>
