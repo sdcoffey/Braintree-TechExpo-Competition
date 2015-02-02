@@ -18,7 +18,6 @@ module MerchantServer
       register Sinatra::Reloader
     end
 
-    set :bind, '0.0.0.0'
     set :static, true
 
     get "/web" do
