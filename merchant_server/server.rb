@@ -52,8 +52,13 @@ module MerchantServer
 
         status 201
         if decode
+          content_type :json
           JSON.pretty_generate(_client_token(:decoded => true))
+        elsif request.accept?('text/plain')
+          content_type :text
+          _client_token
         else
+          content_type :json
           JSON.pretty_generate(:client_token => _client_token)
         end
       rescue Exception => e
@@ -287,7 +292,6 @@ module MerchantServer
     end
 
     def _client_token(options = {})
-      content_type :json
       client_token = Braintree::ClientToken.generate(params)
 
       if options[:decoded]
