@@ -54,12 +54,12 @@ module MerchantServer
         if decode
           content_type :json
           JSON.pretty_generate(_client_token(:decoded => true))
-        elsif request.accept?('text/plain')
-          content_type :text
-          _client_token
-        else
+        elsif request.accept?('application/json')
           content_type :json
           JSON.pretty_generate(:client_token => _client_token)
+        else
+          content_type :text
+          _client_token
         end
       rescue Exception => e
         content_type :json
