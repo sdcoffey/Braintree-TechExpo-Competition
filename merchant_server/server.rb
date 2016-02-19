@@ -21,9 +21,7 @@ module MerchantServer
     set :static, true
 
     get "/web" do
-      _params = params.dup
-      _params[:merchant_account_id] ||= "test_AIB"
-      @client_token = Braintree::ClientToken.generate(_params)
+      @client_token = Braintree::ClientToken.generate(params)
       erb :index
     end
 
