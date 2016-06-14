@@ -87,7 +87,7 @@ module MerchantServer
 
       content_type :json
       if nonce
-        JSON.pretty_generate(sale(nonce, params.fetch(:amount, 1), params[:three_d_secure_required]))
+        JSON.pretty_generate(sale(nonce, params))
       else
         JSON.pretty_generate(
           :message => "Required params: #{server_config[:nonce_param_names].join(", or ")}"
@@ -100,7 +100,7 @@ module MerchantServer
 
       content_type :json
       if nonce
-        JSON.pretty_generate(sale(nonce, params.fetch(:amount, 1), params[:three_d_secure_required]))
+        JSON.pretty_generate(sale(nonce, params))
       else
         JSON.pretty_generate(
           :message => "Required params: #{server_config[:nonce_param_names].join(", or ")}"
@@ -238,17 +238,19 @@ module MerchantServer
       end
     end
 
-    def sale(nonce, amount, three_d_secure_required)
+    def sale(nonce, params)
       transaction_params = {
-        :amount => amount,
+        :amount => params.fetch(:amount, 1),
         :payment_method_nonce => nonce,
       }
 
-      if CONFIG_MANAGER.current_merchant_account.present?
+      if params[:merchant_account_id].present?
+        transaction_params[:merchant_account_id] = params[:merchant_account_id]
+      elsif CONFIG_MANAGER.current_merchant_account.present?
         transaction_params[:merchant_account_id] = CONFIG_MANAGER.current_merchant_account
       end
 
-      if three_d_secure_required.present?
+      if params[:three_d_secure_required].present?
         transaction_params[:options] = {
           :three_d_secure => {
             :required => true,
