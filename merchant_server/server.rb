@@ -34,7 +34,7 @@ module MerchantServer
       routes["POST"] = Server.routes["POST"].map { |r| Server.decompile(r[0], r[1]) }
       routes["PUT"] = Server.routes["PUT"].map { |r| Server.decompile(r[0], r[1]) }
 
-      JSON.pretty_generate(:message => "Server UP", :config => CONFIG_MANAGER.current, :routes => routes)
+      JSON.pretty_generate(:message => "Server Up", :config => CONFIG_MANAGER.current, :routes => routes)
     end
 
     get "/client_token" do
