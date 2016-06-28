@@ -1,5 +1,12 @@
+<head>
+  <title>Payment Demos</title>
+</head>
+
 <script src="braintree.js"></script>
-<script src="jquery-2.1.1.js"></script>
+<!-- Your web-app is https, so your scripts need to be too -->
+<script src="https://code.jquery.com/jquery-2.2.1.min.js"
+  integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="
+  crossorigin="anonymous"></script>
 <script>
   // Using the generated client token to instantiate the 3D-Secure client.
   function threeDS() {
@@ -36,6 +43,95 @@
 </script>
 
 <link rel="stylesheet" href="foundation.min.css">
+
+<h1>Apple Pay on Web</h1>
+
+<script>
+
+function performValidation() {
+  $.ajax({
+    url: '/merchant-session/new'
+  })
+}
+
+function applePayButtonClicked(event) {
+  var paymentRequest = {
+    currencyCode: 'USD',
+    countryCode: 'US',
+    total: {
+      label: 'Canine Clothing',
+      amount: '19.99'
+    },
+    supportedNetworks: ['amex', 'discover', 'masterCard', 'visa' ],
+    merchantCapabilities: [ 'supports3DS' ],
+    requiredShippingAddressFields: [ 'postalAddress' ]
+  };
+
+  var session;
+  session = new ApplePaySession(1, paymentRequest);
+  console.log(session);
+
+  session.onvalidatemerchant = function (event) {
+    console.log('---------- event.validationURL ----------')
+    console.log(event.validationURL);
+
+    var promise = performValidation(event.validationURL);
+
+    promise.then(function (merchantSession) {
+      session.completeMerchantValidation(merchantSession);
+    });
+  }
+
+  session.onpaymentauthorized = function (event) {
+    var promise = sendPaymentToken(event.payment.token);
+
+    promise.then(function (success) {
+      var status;
+      if (success)
+        status = ApplePaySession.STATUS_SUCCESS;
+      else
+        status = ApplePaySession.STATUS_FAILURE;
+
+      session.completePayment(status);
+      showConfirmation();
+    });
+  }
+
+  session.begin();
+}
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  if (window.ApplePaySession) {
+    var merchantIdentifier = 'merchant.com.canine-clothing';
+    var promise = ApplePaySession.canMakePaymentsWithActiveCard(merchantIdentifier);
+    promise.then(function (canMakePayments) {
+      if (canMakePayments)
+        showApplePayButtons();
+    });
+  }
+});
+
+function showApplePayButtons() {
+
+}
+
+</script>
+
+<p class="bold">Apple Pay on web demo</p>
+
+<form action="javascript:void(0)">
+  <button type="submit" onclick="event.preventDefault();applePayButtonClicked(event);">Submit</button>
+</form>
+
+
+
+
+
+
+
+
+<h1>3D Secure</h1>
 
 <div class="row">
   <div class="small-12 columns">
