@@ -1,6 +1,7 @@
 require "active_support/all"
 require "sinatra"
 require "sinatra/contrib/all"
+require "sinatra/cross_origin"
 require "braintree"
 require "term/ansicolor"
 require "base64"
@@ -12,6 +13,7 @@ module MerchantServer
   class Server < Sinatra::Base
     use ExceptionHandling
     register Sinatra::Decompile
+    register Sinatra::CrossOrigin
     include Term::ANSIColor
 
     configure :development do
@@ -37,7 +39,14 @@ module MerchantServer
       JSON.pretty_generate(:message => "Server Up", :config => CONFIG_MANAGER.current, :routes => routes)
     end
 
+    options "/client_token" do
+      response.headers["Allow"] = "HEAD,GET,OPTIONS"
+      response.headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept"
+      200
+    end
+
     get "/client_token" do
+      cross_origin
       begin
         if params["customer_id"]
           Braintree::Customer.create(
