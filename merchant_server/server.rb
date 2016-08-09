@@ -156,6 +156,18 @@ module MerchantServer
       JSON.pretty_generate(:message => CONFIG_MANAGER.validate_environment!)
     end
 
+    before "/log/:contest_name" do
+      if request.env['HTTP_AUTHORIZATION'] != ENV['LOG_AUTH']
+        halt 403
+      end
+    end
+
+    delete "/log/:contest_name" do
+      if File.exists?("./log/#{params[:contest_name]}")
+        File.delete("./log/#{params[:contest_name]}")
+      end
+    end
+
     get "/log/:contest_name" do
       if File.exists?("./log/#{params[:contest_name]}")
         File.read("./log/#{params[:contest_name]}")
