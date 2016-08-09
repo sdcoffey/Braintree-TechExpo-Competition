@@ -1,50 +1,21 @@
-# Sample Merchant Server
+# Braintree TechExpo Competition
 
-A dumb merchant server that makes it easy to work on client SDKs and switch between Braintree environments easily.
+Thanks for participating in the Braintree TechExpo competition! Your challenge is to create a simple web or mobile app that integrates with Braintree. You can find basic docs for integrating Braintree [here](https://developers.braintreepayments.com/start/overview).
 
-## Running Locally
+Your challenge is just to create a client-side integration, we've already created the merchant server for you. We'll be giving away prizes to the 
+first individuals or teams who are able to do any of the following:
 
-```
-bundle
-cp config_example.yml config.yml
-$EDITOR config.yml # Modify this file with your development/sandbox/production credentials.
-./bin/start_server
-```
+ - [Create a transasction](https://developers.braintreepayments.com/guides/transactions/ruby)
+ - [Create a customer](https://developers.braintreepayments.com/guides/customers/ruby)
+ - [Vault a payment method](https://developers.braintreepayments.com/guides/payment-methods/ruby)
 
-Now you'll be able to obtain a client token with `curl localhost:3132/client_token`.
+To keep your integration simple, we've already implemented a merchant server in Sandbox that you should use. There a just a few endpoints you'll need to know:
+* `GET /client_token` - retrieve a client token embedded in JSON under the key `client_token`. You use this client token to initalize your [Braintree Client](https://developers.braintreepayments.com/guides/authorization/client-token).
+* `POST /nonce/transaction` - create a $1 transaction with a nonce. The nonce should be included as a query param, e.g., `http://<server>/nonce/transaction?nonce=your-nonce-from-braintree`.
+* `PUT /customers/:customer_id` - creates a customer with the given customer ID. You can then use this customer Id to vault a payment method.
+* `POST /customers/:customer_id/vault` - vaults a payment method associated with a nonce. Again, the nonce should be included as a query param on the url, e.g, `http://<server>/customers/your-customer-id/vault?nonce=your-nonce-from-braintree`.
 
-To activate a different configuration, `curl -XPOST -d'' localhost:3132/config/:name/activate`.
 
-For a full listing of available endpoints, `curl localhost:3132`.
+# But how will we know who won??
 
-## Deployment
-
-This app is deployed to a number of heroku instances:
-
-* http://braintree-sample-merchant.herokuapp.com/
-* http://executive-sample-merchant.herokuapp.com/
-* http://braintree-qa-merchant.herokuapp.com/
-
-You can access these instances via the Braintree organizational heroku account. Deploying is as simple as `git push`.
-
-A number of our demo apps for iOS and Android rely on these instances.
-
-It's easy to spin up a new instance of your own:
-
-1. Create a new heroku app: `heroku create [NAME]`
-2. Setup the enviornment variables `MERCHANT_ID`, `ENVIRONMENT`, `PUBLIC_KEY` and `PRIVATE_KEY` using `heroku config:set`
-3. Deploy with `git push heroku`
-
-You can also use `heroku clone --app braintree-sample-merchant`.
-
-## API Examples
-
-* `GET /client_token` - retrieve a client token embedded in JSON under the key `client_token`
-* `GET /client_token?decode=1` - retrieve a client token decoded client token
-* `GET /client_token?version=1` - retrieve a `v1` client token
-* `GET /config/current` - see which Braintree environment is being used
-* `GET /` - retrieve an API listing
-
-### Dependencies
-
-This app is referenced in braintree-{ios,android} and the docs. If you make changes, make sure they are compatible before deploying changes.
+Good question! Make sure you include your email as a header in every request to the endpoints listed above, e.g., `-H "Email: moneymover@paypal.com"`

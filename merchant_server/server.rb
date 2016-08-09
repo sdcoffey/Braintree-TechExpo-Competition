@@ -17,10 +17,11 @@ module MerchantServer
     include Term::ANSIColor
 
     configure :development do
-      register Sinatra::Reloader
+      #register Sinatra::Reloader
     end
 
     set :static, true
+    set :logging, false
 
     get "/web" do
       @client_token = Braintree::ClientToken.generate(params)
@@ -43,6 +44,10 @@ module MerchantServer
       response.headers["Allow"] = "HEAD,GET,OPTIONS"
       response.headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept"
       200
+    end
+
+    after "/client_token" do
+      _log_contest_entry("client_token")
     end
 
     get "/client_token" do
@@ -75,6 +80,10 @@ module MerchantServer
       end
     end
 
+    after "/customers/:customer_id" do
+      _log_contest_entry("customer_create")
+    end
+
     put "/customers/:customer_id" do
       result = Braintree::Customer.create(
         :id => params[:customer_id]
@@ -91,17 +100,8 @@ module MerchantServer
       end
     end
 
-    post "/nonce/customer" do
-      nonce = nonce_from_params
-
-      content_type :json
-      if nonce
-        JSON.pretty_generate(sale(nonce, params))
-      else
-        JSON.pretty_generate(
-          :message => "Required params: #{server_config[:nonce_param_names].join(", or ")}"
-        )
-      end
+    after "/nonce/transaction" do
+      _log_contest_entry("transaction_create")
     end
 
     post "/nonce/transaction" do
@@ -115,6 +115,10 @@ module MerchantServer
           :message => "Required params: #{server_config[:nonce_param_names].join(", or ")}"
         )
       end
+    end
+
+    after "/customers/:customer_id/vault" do
+      _log_contest_entry("payment_method_create")
     end
 
     post "/customers/:customer_id/vault" do
@@ -148,64 +152,14 @@ module MerchantServer
       JSON.pretty_generate(CONFIG_MANAGER.current_account.as_json)
     end
 
-    post "/config/:name/activate" do
-      content_type :json
-
-      if CONFIG_MANAGER.has_config?(params[:name])
-        status 200
-        CONFIG_MANAGER.activate!(params[:name])
-        JSON.pretty_generate(:message => "#{params[:name]} activated")
-      else
-        status 404
-        JSON.pretty_generate(:message => "#{params[:name]} not found")
-      end
-    end
-
-    put "/config/:name" do
-      content_type :json
-
-      if CONFIG_MANAGER.has_config?(params[:name])
-        status 422
-        JSON.pretty_generate(:message => "#{params[:name]} already exists")
-      else
-        begin
-          CONFIG_MANAGER.add(
-            params[:name],
-            :environment => params[:environment],
-            :merchant_id => params[:merchant_id],
-            :public_key => params[:public_key],
-            :private_key => params[:private_key]
-          )
-          CONFIG_MANAGER.test_environment!(params[:name])
-
-          status 201
-          JSON.pretty_generate(:message => "#{params[:name]} created")
-        rescue Exception => e
-          status 422
-          JSON.pretty_generate(:message => e.message)
-        end
-      end
-    end
-
-    get "/config/merchant_account" do
-      content_type :json
-      JSON.pretty_generate(:merchant_account => CONFIG_MANAGER.current_merchant_account)
-    end
-
-    put "/config/merchant_account/:merchant_account" do
-      content_type :json
-      CONFIG_MANAGER.current_merchant_account = params[:merchant_account]
-      JSON.pretty_generate(:merchant_account => CONFIG_MANAGER.current_merchant_account)
-    end
-
-    delete "/config/merchant_account" do
-      content_type :json
-      CONFIG_MANAGER.current_merchant_account = nil
-      JSON.pretty_generate(:merchant_account => CONFIG_MANAGER.current_merchant_account)
-    end
-
     get "/config/validate" do
       JSON.pretty_generate(:message => CONFIG_MANAGER.validate_environment!)
+    end
+
+    get "/log/:contest_name" do
+      if File.exists?("./log/#{params[:contest_name]}")
+        File.read("./log/#{params[:contest_name]}")
+      end
     end
 
     error do
@@ -221,14 +175,6 @@ module MerchantServer
       JSON.pretty_generate({:message => "Not found. GET / to see all routes"})
     end
 
-    after do
-      puts "#{bold ">>>"} #{request.env["REQUEST_METHOD"]} #{request.path} #{params.inspect}"
-      puts "#{green bold "<<<"} #{_color_status(response.status.to_i)}"
-      response.body.first.split("\n").each do |line|
-        puts "#{green bold "<<<"} #{line}"
-      end
-    end
-
     def server_config
       {
         :nonce_param_names => ["nonce", "payment_method_nonce", "paymentMethodNonce"]
@@ -237,6 +183,15 @@ module MerchantServer
 
     def log(message)
       puts "--- [#{CONFIG_MANAGER.current}] #{message}"
+    end
+
+    def _log_contest_entry(path)
+      message = "#{Time.new.inspect} -- #{request.user_agent} -- #{response.status} -- #{request.env['HTTP_EMAIL']} (#{request.ip})"
+      Dir.mkdir("./log") unless File.exists?("./log")
+      open("./log/#{path}", 'a') do |f|
+        f.puts message
+      end
+      log message
     end
 
     def nonce_from_params
@@ -270,10 +225,6 @@ module MerchantServer
       log("Creating transaction #{transaction_params.inspect}")
 
       result = Braintree::Transaction.sale(transaction_params)
-
-      if result.transaction.present?
-        void_result = Braintree::Transaction.void(result.transaction.id)
-      end
 
       if result.success? and void_result.present? and void_result.success?
         {:message => "created #{result.transaction.id} #{result.transaction.status}"}
