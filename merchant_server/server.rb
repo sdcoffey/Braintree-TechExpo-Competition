@@ -226,10 +226,10 @@ module MerchantServer
 
       result = Braintree::Transaction.sale(transaction_params)
 
-      if result.success? and void_result.present? and void_result.success?
+      if result.success?
         {:message => "created #{result.transaction.id} #{result.transaction.status}"}
       else
-        {:message => result.message || void_result.message}
+        {:message => result.message}
       end
 
     rescue Exception => e
